@@ -6,6 +6,17 @@ export type LabMessage = {
   partitionId: number
   offset: number
   stage: MessageStage
+  consumerId?: string
+}
+
+/** monitor SSE payload */
+export type MonitorEvent = {
+  type: 'PRODUCED' | 'CONSUMED'
+  sequence: number
+  payload: string
+  partition: number
+  offset: number
+  consumerId: string | null
 }
 
 export type BrokerRole = 'leader' | 'follower'

@@ -1,10 +1,6 @@
 import { useState } from 'react'
 import type { LabMessage } from '../types'
-import {
-  BROKERS,
-  PARTITION_COUNT,
-  CONSUMER_COUNT,
-} from '../mockData'
+import { BROKERS, PARTITION_COUNT, CONSUMER_IDS } from '../constants'
 
 /** text-sm(leading-5) 4줄 + space-y-1 간격 3곳 */
 const EVENT_LIST_HEIGHT = 'h-[5.75rem]'
@@ -12,16 +8,17 @@ const EVENT_LIST_HEIGHT = 'h-[5.75rem]'
 type TopologyViewProps = {
   messages: LabMessage[]
   onProduce: () => void
+  producing?: boolean
 }
 
 export function TopologyView({
   messages,
   onProduce,
+  producing = false,
 }: TopologyViewProps) {
   const [activeBrokerId, setActiveBrokerId] = useState(0)
 
   const partitions = Array.from({ length: PARTITION_COUNT }, (_, id) => id)
-  const consumers = Array.from({ length: CONSUMER_COUNT }, (_, id) => id)
   const activeBroker =
     BROKERS.find((b) => b.id === activeBrokerId) ?? BROKERS[0]
 
@@ -39,13 +36,14 @@ export function TopologyView({
           <button
             type="button"
             onClick={onProduce}
-            className="text-blue-800 cursor-pointer px-3 py-2 hover:text-black hover:underline mt-auto self-end"
+            disabled={producing}
+            className="text-blue-800 cursor-pointer px-3 py-2 hover:text-black hover:underline mt-auto self-end disabled:opacity-50 disabled:cursor-wait"
           >
             이벤트 생성
           </button>
         </section>
 
-        {/* Broker — 제목이 broker 탭 */}
+        {/* Broker — 제목이 Broker 탭 */}
         <section className="flex-1 border border-gray-300 p-4 min-w-0">
           <h2 className="text-xl mb-1 flex flex-wrap items-baseline gap-4">
             {BROKERS.map((broker) => {
@@ -61,7 +59,7 @@ export function TopologyView({
                       : 'text-blue-800 cursor-pointer hover:text-black hover:underline'
                   }
                 >
-                  broker-{broker.id}
+                  Broker {broker.id}
                 </button>
               )
             })}
@@ -104,25 +102,20 @@ export function TopologyView({
 
         {/* Consumers */}
         <section className="w-52 shrink-0 flex flex-col gap-3">
-          {consumers.map((consumerId) => {
-            const assignedPartition = consumerId
+          {CONSUMER_IDS.map((backendId, index) => {
             const recent = messages
               .filter(
-                (m) =>
-                  m.partitionId === assignedPartition &&
-                  m.stage === 'consumed',
+                (m) => m.stage === 'consumed' && m.consumerId === backendId,
               )
               .slice()
               .reverse()
 
             return (
               <div
-                key={consumerId}
+                key={backendId}
                 className="border border-gray-300 p-3 flex-1 min-h-0 flex flex-col"
               >
-                <h4 className="text-black mb-1 shrink-0">
-                  Consumer {consumerId}
-                </h4>
+                <h4 className="text-black mb-1 shrink-0">Consumer {index}</h4>
                 <p className="text-sm text-gray-500 mb-2 shrink-0">
                   {recent.length}개 소비
                 </p>
@@ -131,7 +124,7 @@ export function TopologyView({
                     <ul className="space-y-1">
                       {recent.slice(0, 5).map((msg) => (
                         <li key={msg.id} className="text-sm leading-5 text-black">
-                          offset {msg.offset}: {msg.payload}
+                          p{msg.partitionId} offset {msg.offset}: {msg.payload}
                         </li>
                       ))}
                     </ul>

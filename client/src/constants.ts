@@ -29,5 +29,9 @@ export const BROKERS: Broker[] = [
 ]
 
 export const PARTITION_COUNT = 3
-export const CONSUMER_COUNT = 3
-export const DISPLAY_HOLD_MS = 1000
+
+/** compose CONSUMER_ID — 화면 라벨 Consumer 0..n-1 과 1:1 */
+export const CONSUMER_IDS = ['consumer-1', 'consumer-2', 'consumer-3'] as const
+
+/** CONSUMED SSE 수신 후 consumer 상자로 옮기기 전 파티션에 남겨 두는 시간 */
+export const CONSUMED_DISPLAY_DELAY_MS = 1000
