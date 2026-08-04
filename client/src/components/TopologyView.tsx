@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import type { LabMessage } from '../types'
-import { BROKERS, PARTITION_COUNT, CONSUMER_IDS } from '../constants'
+import { useCallback, useEffect, useState } from 'react'
+import type { LabMessage, PartitionLeader } from '../types'
+import { DEFAULT_BROKER_IDS, PARTITION_COUNT, CONSUMER_IDS } from '../constants'
 
 /** text-sm(leading-5) 4줄 + space-y-1 간격 3곳 */
 const EVENT_LIST_HEIGHT = 'h-[5.75rem]'
@@ -9,22 +9,57 @@ type TopologyViewProps = {
   messages: LabMessage[]
   onProduce: () => void
   producing?: boolean
+  /** produce/reset 후 리더 정보 다시 읽게 */
+  topologyTick?: number
 }
 
 export function TopologyView({
   messages,
   onProduce,
   producing = false,
+  topologyTick = 0,
 }: TopologyViewProps) {
-  const [activeBrokerId, setActiveBrokerId] = useState(0)
+  const [leaders, setLeaders] = useState<PartitionLeader[]>([])
+  const [activeBrokerId, setActiveBrokerId] = useState<number>(DEFAULT_BROKER_IDS[0])
+
+  const loadTopology = useCallback(async () => {
+    try {
+      const res = await fetch('/api/topology')
+      if (!res.ok) {
+        console.error('topology failed', res.status)
+        return
+      }
+      const data = (await res.json()) as PartitionLeader[]
+      setLeaders(data)
+    } catch (e) {
+      console.error('topology failed', e)
+    }
+  }, [])
+
+  // 처음 + 주기적으로 진짜 리더 갱신 (브로커 kill 실험용)
+  useEffect(() => {
+    void loadTopology()
+    const id = window.setInterval(() => {
+      void loadTopology()
+    }, 2000)
+    return () => window.clearInterval(id)
+  }, [loadTopology])
+
+  useEffect(() => {
+    if (topologyTick > 0) {
+      void loadTopology()
+    }
+  }, [topologyTick, loadTopology])
 
   const partitions = Array.from({ length: PARTITION_COUNT }, (_, id) => id)
-  const activeBroker =
-    BROKERS.find((b) => b.id === activeBrokerId) ?? BROKERS[0]
 
-  const roleOf = (partitionId: number) =>
-    activeBroker.partitions.find((p) => p.partitionId === partitionId)?.role ??
-    'follower'
+  const roleOf = (brokerId: number, partitionId: number): string => {
+    const p = leaders.find((x) => x.partition === partitionId)
+    if (!p || p.leader < 0) {
+      return '?'
+    }
+    return p.leader === brokerId ? 'leader' : 'follower'
+  }
 
   return (
     <main className="w-full max-w-6xl mx-auto px-4 pb-10">
@@ -43,23 +78,23 @@ export function TopologyView({
           </button>
         </section>
 
-        {/* Broker — 제목이 Broker 탭 */}
+        {/* Broker — 탭 id = Kafka NODE_ID (1..3 고정) */}
         <section className="flex-1 border border-gray-300 p-4 min-w-0">
           <h2 className="text-xl mb-1 flex flex-wrap items-baseline gap-4">
-            {BROKERS.map((broker) => {
-              const isActive = broker.id === activeBrokerId
+            {DEFAULT_BROKER_IDS.map((brokerId) => {
+              const isActive = brokerId === activeBrokerId
               return (
                 <button
-                  key={broker.id}
+                  key={brokerId}
                   type="button"
-                  onClick={() => setActiveBrokerId(broker.id)}
+                  onClick={() => setActiveBrokerId(brokerId)}
                   className={
                     isActive
                       ? 'text-black underline cursor-pointer'
                       : 'text-blue-800 cursor-pointer hover:text-black hover:underline'
                   }
                 >
-                  Broker {broker.id}
+                  Broker {brokerId}
                 </button>
               )
             })}
@@ -70,7 +105,7 @@ export function TopologyView({
                 (m) =>
                   m.partitionId === partitionId && m.stage === 'partition',
               )
-              const role = roleOf(partitionId)
+              const role = roleOf(activeBrokerId, partitionId)
 
               return (
                 <div

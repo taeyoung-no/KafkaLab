@@ -19,14 +19,8 @@ export type MonitorEvent = {
   consumerId: string | null
 }
 
-export type BrokerRole = 'leader' | 'follower'
-
-export type PartitionReplica = {
-  partitionId: number
-  role: BrokerRole
-}
-
-export type Broker = {
-  id: number
-  partitions: PartitionReplica[]
+/** producer GET /api/topology — 파티션 n의 리더 브로커 id */
+export type PartitionLeader = {
+  partition: number
+  leader: number
 }

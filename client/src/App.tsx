@@ -8,6 +8,7 @@ function App() {
   const [messages, setMessages] = useState<LabMessage[]>([])
   const [producing, setProducing] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [topologyTick, setTopologyTick] = useState(0)
   const consumeTimers = useRef<Map<string, number>>(new Map())
 
   useEffect(() => {
@@ -107,6 +108,8 @@ function App() {
       const res = await fetch('/api/produce')
       if (!res.ok) {
         console.error('produce failed', res.status)
+      } else {
+        setTopologyTick((n) => n + 1)
       }
     } catch (e) {
       console.error('produce failed', e)
@@ -132,6 +135,7 @@ function App() {
       }
       consumeTimers.current.clear()
       setMessages([])
+      setTopologyTick((n) => n + 1)
     } catch (e) {
       console.error('reset failed', e)
     } finally {
@@ -146,6 +150,7 @@ function App() {
         messages={messages}
         onProduce={handleProduce}
         producing={producing || resetting}
+        topologyTick={topologyTick}
       />
     </div>
   )
