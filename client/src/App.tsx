@@ -7,6 +7,7 @@ import type { LabMessage, MonitorEvent } from './types'
 function App() {
   const [messages, setMessages] = useState<LabMessage[]>([])
   const [producing, setProducing] = useState(false)
+  const [resetting, setResetting] = useState(false)
   const consumeTimers = useRef<Map<string, number>>(new Map())
 
   useEffect(() => {
@@ -98,7 +99,7 @@ function App() {
   }, [])
 
   const handleProduce = useCallback(async () => {
-    if (producing) {
+    if (producing || resetting) {
       return
     }
     setProducing(true)
@@ -112,15 +113,39 @@ function App() {
     } finally {
       setProducing(false)
     }
-  }, [producing])
+  }, [producing, resetting])
+
+  const handleReset = useCallback(async () => {
+    if (resetting || producing) {
+      return
+    }
+    setResetting(true)
+    try {
+      const res = await fetch('/api/reset', { method: 'POST' })
+      if (!res.ok) {
+        console.error('reset failed', res.status)
+        return
+      }
+      // 화면 상태도 같이 비움 (서버 토픽/시퀀스 초기화와 맞춤)
+      for (const timer of consumeTimers.current.values()) {
+        window.clearTimeout(timer)
+      }
+      consumeTimers.current.clear()
+      setMessages([])
+    } catch (e) {
+      console.error('reset failed', e)
+    } finally {
+      setResetting(false)
+    }
+  }, [resetting, producing])
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      <Navbar onReset={handleReset} resetting={resetting} />
       <TopologyView
         messages={messages}
         onProduce={handleProduce}
-        producing={producing}
+        producing={producing || resetting}
       />
     </div>
   )

@@ -11,6 +11,11 @@ export default defineConfig({
         target: 'http://localhost:8081',
         changeOrigin: true,
       },
+      '/api/reset': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+      },
+
       '/api/stream': {
         target: 'http://localhost:8085',
         changeOrigin: true,
