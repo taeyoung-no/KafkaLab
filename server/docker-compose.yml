@@ -1,7 +1,7 @@
 services:
   kafka:
     image: apache/kafka:3.9.0
-    container_name: kafaklab-kafka
+    container_name: kafkalab-kafka
     ports:
       - "9092:9092"
     environment:
@@ -19,3 +19,36 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_NUM_PARTITIONS: 3
+
+  producer:
+    build: ./producer
+    container_name: kafkalab-producer
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SERVER_PORT: 8081
+
+  consumer-1:
+    build: ./consumer
+    container_name: kafkalab-consumer-1
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_KAFKA_CONSUMER_GROUP_ID: lab-consumer
+      SERVER_PORT: 8082
+
+  consumer-2:
+    build: ./consumer
+    container_name: kafkalab-consumer-2
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_KAFKA_CONSUMER_GROUP_ID: lab-consumer
+      SERVER_PORT: 8083
+
+  consumer-3:
+    build: ./consumer
+    container_name: kafkalab-consumer-3
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_KAFKA_CONSUMER_GROUP_ID: lab-consumer
+      SERVER_PORT: 8084
