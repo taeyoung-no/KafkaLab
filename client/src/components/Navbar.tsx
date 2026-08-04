@@ -13,7 +13,7 @@ export function Navbar({ onReset, resetting }: NavbarProps) {
             type="button"
             onClick={onReset}
             disabled={resetting}
-            className="cursor-pointer hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer enabled:hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {resetting ? '초기화 중…' : '초기화'}
           </button>

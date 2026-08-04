@@ -72,7 +72,7 @@ export function TopologyView({
             type="button"
             onClick={onProduce}
             disabled={producing}
-            className="text-blue-800 cursor-pointer px-3 py-2 hover:text-black hover:underline mt-auto self-end disabled:opacity-50 disabled:cursor-wait"
+            className="text-blue-800 cursor-pointer px-3 py-2 enabled:hover:text-black enabled:hover:underline mt-auto self-end disabled:opacity-50 disabled:cursor-wait"
           >
             이벤트 생성
           </button>
