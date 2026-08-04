@@ -94,14 +94,6 @@ public class EventProducerService {
 			}
 
 			admin.deleteTopics(Set.of(TOPIC)).all().get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
-			for (int i = 0; i < 10; i++) {
-				if (!admin.listTopics().names().get(TIMEOUT_SEC, TimeUnit.SECONDS).contains(TOPIC)) {
-					return;
-				}
-				Thread.sleep(1000);
-			}
-			throw new IllegalStateException("서버 문제인 듯");
 		} catch (Exception e) {
 			throw new IllegalStateException("서버 문제인 듯", e);
 		}
