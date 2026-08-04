@@ -14,10 +14,14 @@ public class EventProducerService {
 	private static final int PARTITION_COUNT = 3;
 
 	private final KafkaTemplate<String, String> kafkaTemplate;
+	private final MonitorReporter monitorReporter;
 	private final AtomicLong sequence = new AtomicLong(0);
 
-	public EventProducerService(KafkaTemplate<String, String> kafkaTemplate) {
+	public EventProducerService(
+			KafkaTemplate<String, String> kafkaTemplate,
+			MonitorReporter monitorReporter) {
 		this.kafkaTemplate = kafkaTemplate;
+		this.monitorReporter = monitorReporter;
 	}
 
 	public ProducedEvent produce() {
@@ -31,6 +35,7 @@ public class EventProducerService {
 					.send(TOPIC, partition, key, payload)
 					.get();
 			RecordMetadata meta = result.getRecordMetadata();
+			monitorReporter.reportProduced(n, payload, meta.partition(), meta.offset());
 			return new ProducedEvent(n, payload, TOPIC, meta.partition(), meta.offset());
 		} catch (Exception e) {
 			throw new IllegalStateException("서버 문제인 듯" + TOPIC, e);

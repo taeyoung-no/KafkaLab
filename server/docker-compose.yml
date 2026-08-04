@@ -20,6 +20,14 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_NUM_PARTITIONS: 3
 
+  monitor:
+    build: ./monitor
+    container_name: kafkalab-monitor
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: 8085
+
   producer:
     build: ./producer
     container_name: kafkalab-producer
@@ -28,6 +36,7 @@ services:
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SERVER_PORT: 8081
+      MONITOR_URL: http://monitor:8085
 
   consumer-1:
     build: ./consumer
@@ -36,6 +45,8 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_CONSUMER_GROUP_ID: lab-consumer
       SERVER_PORT: 8082
+      MONITOR_URL: http://monitor:8085
+      CONSUMER_ID: consumer-1
 
   consumer-2:
     build: ./consumer
@@ -44,6 +55,8 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_CONSUMER_GROUP_ID: lab-consumer
       SERVER_PORT: 8083
+      MONITOR_URL: http://monitor:8085
+      CONSUMER_ID: consumer-2
 
   consumer-3:
     build: ./consumer
@@ -52,3 +65,5 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_CONSUMER_GROUP_ID: lab-consumer
       SERVER_PORT: 8084
+      MONITOR_URL: http://monitor:8085
+      CONSUMER_ID: consumer-3
