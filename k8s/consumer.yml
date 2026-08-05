@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer-1
+  template:
+    metadata:
+      labels:
+        app: consumer-1
+    spec:
+      containers:
+        - name: consumer
+          image: 355653384852.dkr.ecr.ap-northeast-2.amazonaws.com/kafka-consumer
+          env:
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka-1:29092,kafka-2:29092,kafka-3:29092
+            - name: MONITOR_URL
+              value: http://monitor
+            - name: CONSUMER_ID
+              value: consumer-1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer-2
+  template:
+    metadata:
+      labels:
+        app: consumer-2
+    spec:
+      containers:
+        - name: consumer
+          image: 355653384852.dkr.ecr.ap-northeast-2.amazonaws.com/kafka-consumer
+          env:
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka-1:29092,kafka-2:29092,kafka-3:29092
+            - name: MONITOR_URL
+              value: http://monitor
+            - name: CONSUMER_ID
+              value: consumer-2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer-3
+  template:
+    metadata:
+      labels:
+        app: consumer-3
+    spec:
+      containers:
+        - name: consumer
+          image: 355653384852.dkr.ecr.ap-northeast-2.amazonaws.com/kafka-consumer
+          env:
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka-1:29092,kafka-2:29092,kafka-3:29092
+            - name: MONITOR_URL
+              value: http://monitor
+            - name: CONSUMER_ID
+              value: consumer-3
