@@ -30,7 +30,7 @@ Docker(개발용), K8s(프로덕션용)
 AWS ECR, EKS
 
 ## 개발 노트
-- [EKS에 배포하면서 겪은 시행착오 모음](https://taeyoung-no.github.io/kafka%20lab/2026/08/09/eks.html)
+- [EKS에 배포하면서 겪은 시행착오 모음](https://taeyoung-no.github.io/2026/08/09/eks.html)
 
 ## 로컬 실행
 ### 요구사항
